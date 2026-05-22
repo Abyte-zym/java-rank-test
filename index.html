@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java面试段位测试 | 青铜→王者</title>
+<meta name="description" content="测测你的Java面试级别—20道随机题覆盖JVM/并发/Spring/MySQL/Redis/分布式·青铜到王者·朋友圈分享你的段位">
+<style>
+:root{--bg:#0d1117;--card:#161b22;--border:#30363d;--text:#c9d1d9;--accent:#58a6ff;--gold:#f0c040;--green:#3fb950;--red:#f85149;--purple:#bc8cff}
+*{box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:0;min-height:100vh}
+.container{max-width:700px;margin:0 auto;padding:20px}
+h1{color:var(--accent);text-align:center;font-size:28px;margin:10px 0}
+.subtitle{text-align:center;color:#8b949e;margin-bottom:24px}
+
+/* Ranks */
+.rank-display{text-align:center;padding:30px 20px;border-radius:16px;margin:20px 0;display:none}
+.rank-badge{font-size:60px;margin:10px 0}
+.rank-title{font-size:24px;font-weight:bold}
+.rank-desc{color:#8b949e;margin:8px 0}
+.rank-score{font-size:18px;font-weight:bold}
+.bronze{background:linear-gradient(135deg,#2d1f1f,#3d2a1f);border:2px solid #cd7f32}
+.silver{background:linear-gradient(135deg,#1f2d2d,#1f2d3d);border:2px solid #c0c0c0}
+.gold{background:linear-gradient(135deg,#2d2d1f,#3d2d1f);border:2px solid #f0c040}
+.platinum{background:linear-gradient(135deg,#1f3d2d,#1f2d3d);border:2px solid #bc8cff}
+.diamond{background:linear-gradient(135deg,#1f1f3d,#2d1f3d);border:2px solid #58a6ff)}
+.king{background:linear-gradient(135deg,#3d1f1f,#3d1f2d);border:2px solid #f85149}
+
+/* Quiz card */
+.quiz-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin:16px 0}
+.question{font-size:17px;font-weight:bold;margin-bottom:16px;color:var(--accent)}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;margin-bottom:20px}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s}
+.option{display:block;width:100%;padding:12px 16px;margin:8px 0;background:#1a2332;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:15px;cursor:pointer;text-align:left;transition:all .2s}
+.option:hover{background:#253341;border-color:var(--accent)}
+.option.correct{background:#1a3d1a;border-color:var(--green)}
+.option.wrong{background:#3d1a1a;border-color:var(--red)}
+
+/* Start screen */
+.start-screen{text-align:center;padding:40px 20px}
+.start-ranks{display:flex;justify-content:center;gap:12px;margin:24px 0;flex-wrap:wrap}
+.rank-icon{font-size:32px;padding:12px 20px;border-radius:12px;background:var(--card);border:1px solid var(--border)}
+.btn{display:inline-block;padding:14px 40px;margin:10px;border:none;border-radius:25px;font-size:17px;font-weight:bold;cursor:pointer;transition:.2s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#4090e0}
+.btn-share{background:var(--green);color:#fff}
+.btn-share:hover{background:#2ea043}
+
+/* Results */
+.result-card{display:none}
+.share-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:16px 0}
+.stats{display:flex;justify-content:center;gap:20px;margin:16px 0}
+.stat{text-align:center}
+.stat-value{font-size:28px;font-weight:bold;color:var(--accent)}
+.stat-label{font-size:12px;color:#8b949e}
+
+/* Donate */
+.donate{text-align:center;margin:30px 0;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:12px}
+.donate img{width:180px;border-radius:12px}
+
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="start-screen" id="startScreen">
+  <h1>⚔️ Java面试段位测试</h1>
+  <p class="subtitle">20道随机题 · 覆盖JVM/并发/Spring/MySQL/Redis/分布式</p>
+  <div class="start-ranks">
+    <div class="rank-icon">🥉青铜</div>
+    <div class="rank-icon">🥈白银</div>
+    <div class="rank-icon">🥇黄金</div>
+    <div class="rank-icon">💎铂金</div>
+    <div class="rank-icon">💠钻石</div>
+    <div class="rank-icon">👑王者</div>
+  </div>
+  <button class="btn btn-primary" onclick="startQuiz()">开始测试 ⚡</button>
+  <p style="color:#8b949e;font-size:13px;margin-top:16px">答完分享你的段位到朋友圈！</p>
+</div>
+
+<div class="quiz-card hidden" id="quizCard">
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div style="color:#8b949e;font-size:13px;margin-bottom:8px">第 <span id="qNum">1</span>/20 题</div>
+  <div class="question" id="question"></div>
+  <div id="options"></div>
+</div>
+
+<div class="result-card" id="resultCard">
+  <div class="rank-display" id="rankDisplay">
+    <div class="rank-badge" id="rankBadge"></div>
+    <div class="rank-title" id="rankTitle"></div>
+    <div class="rank-desc" id="rankDesc"></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-value" id="correctCount">0</div><div class="stat-label">正确</div></div>
+    <div class="stat"><div class="stat-value" id="accuracy">0%</div><div class="stat-label">正确率</div></div>
+    <div class="stat"><div class="stat-value" id="timeUsed">0s</div><div class="stat-label">用时</div></div>
+  </div>
+  <div class="share-actions">
+    <button class="btn btn-primary" onclick="retryQuiz()">再测一次 🔄</button>
+    <button class="btn btn-share" onclick="shareResult()">📤 分享段位</button>
+  </div>
+  <div class="donate">
+    <h3>☕ 这个工具有用？请我喝杯咖啡</h3>
+    <img src="../mm_facetoface_collect_qrcode_1779427130944.png" alt="赞赏">
+    <p style="font-size:12px;color:#8b949e">全部20个免费工具 → <a href="https://Abyte-zym.github.io/arsenal">Java弹药库</a></p>
+  </div>
+</div>
+
+</div>
+
+<script>
+// 20 questions covering all major topics
+const allQuestions = [
+  {q:"HashMap在JDK8中用什么数据结构解决哈希冲突？", opts:["链表","红黑树","链表+红黑树","跳表"], ans:2, topic:"JVM"},
+  {q:"JVM哪个区域存放对象实例？", opts:["方法区","堆","虚拟机栈","程序计数器"], ans:1, topic:"JVM"},
+  {q:"CMS和G1的最大区别？", opts:["CMS不分代","G1有Region设计","CMS可预测停顿","G1用标记清除"], ans:1, topic:"JVM"},
+  {q:"volatile关键字保证什么？", opts:["原子性+可见性","可见性+有序性","原子性+有序性","以上都是"], ans:1, topic:"并发"},
+  {q:"synchronized锁升级顺序？", opts:["偏向→轻量→重量","轻量→偏向→重量","重量→轻量→偏向","偏向→重量→轻量"], ans:0, topic:"并发"},
+  {q:"ConcurrentHashMap在JDK8用什么保证线程安全？", opts:["Segment分段锁","CAS+synchronized","ReentrantLock","synchronized only"], ans:1, topic:"并发"},
+  {q:"@SpringBootApplication包含哪三个注解？", opts:["@Configuration+@EnableAutoConfiguration+@ComponentScan","@Service+@Controller+@Repository","@Bean+@Autowired+@Value","@SpringBoot+@AutoConfig+@Scan"], ans:0, topic:"Spring"},
+  {q:"@Transactional失效的场景？", opts:["public方法","异常被catch","RuntimeException","加了rollbackFor"], ans:1, topic:"Spring"},
+  {q:"Spring AOP底层用什么实现？", opts:["JDK动态代理 or CGLIB","反射","字节码增强","拦截器"], ans:0, topic:"Spring"},
+  {q:"MySQL索引最左前缀原则什么意思？", opts:["索引第一列不能为NULL","联合索引从最左列开始匹配","每列都建索引","主键必须排最左"], ans:1, topic:"MySQL"},
+  {q:"EXPLAIN中type=ALL表示什么？", opts:["使用了索引","全表扫描","使用了唯一索引","使用了覆盖索引"], ans:1, topic:"MySQL"},
+  {q:"Redis缓存穿透怎么解决？", opts:["增加内存","布隆过滤器","主从复制","AOF持久化"], ans:1, topic:"Redis"},
+  {q:"Redis分布式锁用什么命令？", opts:["INCR","GET","SETNX","LPUSH"], ans:2, topic:"Redis"},
+  {q:"CAP定理中的P是什么？", opts:["性能Performance","分区容错Partition tolerance","持久化Persistence","并行Parallel"], ans:1, topic:"分布式"},
+  {q:"雪花算法生成的ID多少位？", opts:["32位","48位","64位","128位"], ans:2, topic:"分布式"},
+  {q:"RocketMQ事务消息核心流程？", opts:["先发消息再执行本地事务","半消息→执行事务→提交/回滚","先执行再发消息","不需要确认"], ans:1, topic:"MQ"},
+  {q:"Spring Cloud Alibaba的服务注册中心是？", opts:["Eureka","Consul","Nacos","ZooKeeper"], ans:2, topic:"微服务"},
+  {q:"Sentinel的流控模式有哪些？", opts:["QPS/并发线程数","漏桶/令牌桶","固定窗口/滑动窗口"], ans:0, topic:"微服务"},
+  {q:"Docker镜像分层的好处？", opts:["方便删除","共享基础层节省空间","加速下载","以上都是"], ans:3, topic:"Docker"},
+  {q:"TCP三次握手中SYN+ACK在第几步？", opts:["第一步","第二步","第三步","不出现"], ans:1, topic:"网络"},
+  {q:"POST和PUT的区别？", opts:["POST创建 PUT更新","POST幂等 PUT不幂等","POST读 PUT写","无区别"], ans:0, topic:"HTTP"},
+  {q:"String能被继承吗？", opts:["能","不能，用final修饰","能，用extends","看情况"], ans:1, topic:"基础"},
+  {q:"ArrayList和LinkedList区别？", opts:["ArrayList查询快 LinkedList增删快","ArrayList增删快 LinkedList查询快","完全一样","LinkedList线程安全"], ans:0, topic:"基础"},
+  {q:"ThreadPoolExecutor核心参数？", opts:["coreSize+maxSize+queue+handler","只有coreSize和queue","coreSize+maxSize+timeout","以上都不对"], ans:0, topic:"并发"},
+  {q:"MyBatis中#{}和${}的区别？", opts:["无区别","#{}预编译防注入 ${}字符串替换","${}预编译 #{}字符串替换","都防SQL注入"], ans:1, topic:"MyBatis"},
+  {q:"Spring Bean默认是单例还是多例？", opts:["单例","多例","原型","每次请求新建"], ans:0, topic:"Spring"},
+  {q:"GC Roots不包括什么？", opts:["栈帧中的引用","静态变量","JNI引用","堆中对象间的引用"], ans:3, topic:"JVM"},
+  {q:"Kafka为什么高性能？", opts:["顺序写磁盘+零拷贝","索引多","内存大","CPU强"], ans:0, topic:"MQ"},
+  {q:"Nginx的负载均衡策略不包括？", opts:["轮询","IP哈希","随机丢弃","最少连接"], ans:2, topic:"网络"},
+  {q:"finally块中return会发生什么？", opts:["覆盖try中return值","正常","编译报错","无影响"], ans:0, topic:"基础"}
+];
+
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
+
+let questions=[],current=0,score=0,startTime;
+
+function startQuiz(){
+  questions=shuffle([...allQuestions]).slice(0,20);
+  current=0;score=0;startTime=Date.now();
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('quizCard').classList.remove('hidden');
+  document.getElementById('resultCard').style.display='none';
+  showQuestion();
+}
+
+function showQuestion(){
+  const q=questions[current];
+  document.getElementById('qNum').textContent=current+1;
+  document.getElementById('question').textContent=q.q;
+  document.getElementById('progressFill').style.width=((current)/20*100)+'%';
+  const optsDiv=document.getElementById('options');
+  optsDiv.innerHTML='';
+  q.opts.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='option';
+    btn.textContent=opt;
+    btn.onclick=()=>answer(i,btn);
+    optsDiv.appendChild(btn);
+  });
+}
+
+function answer(idx,btn){
+  const q=questions[current];
+  const allOpts=document.querySelectorAll('.option');
+  allOpts.forEach(o=>o.onclick=null);
+  if(idx===q.ans){score++;btn.classList.add('correct')}
+  else{btn.classList.add('wrong');allOpts[q.ans].classList.add('correct')}
+  setTimeout(()=>{
+    current++;
+    if(current>=20)showResult();
+    else{showQuestion();}
+  },800);
+}
+
+function showResult(){
+  document.getElementById('quizCard').classList.add('hidden');
+  document.getElementById('resultCard').style.display='block';
+  document.getElementById('progressFill').style.width='100%';
+  const acc=Math.round(score/20*100);
+  const time=Math.round((Date.now()-startTime)/1000);
+  document.getElementById('correctCount').textContent=score;
+  document.getElementById('accuracy').textContent=acc+'%';
+  document.getElementById('timeUsed').textContent=time+'s';
+  const rd=document.getElementById('rankDisplay');
+  rd.className='rank-display ';
+  let badge,title,desc,rankClass;
+  if(acc>=95){badge='👑';title='王者';desc='Java面试所向披靡，大厂Offer收割机！';rankClass='king'}
+  else if(acc>=80){badge='💠';title='钻石';desc='面试高手，基础扎实；冲大厂有戏！';rankClass='diamond'}
+  else if(acc>=65){badge='💎';title='铂金';desc='中上水平，微服务+MQ再加把劲！';rankClass='platinum'}
+  else if(acc>=50){badge='🥇';title='黄金';desc='基础还行，JVM和并发多补补~';rankClass='gold'}
+  else if(acc>=30){badge='🥈';title='白银';desc='刚起步，Spring全家桶学起来！';rankClass='silver'}
+  else{badge='🥉';title='青铜';desc='刚开始学Java，坚持下去！';rankClass='bronze'}
+  rd.classList.add(rankClass);
+  document.getElementById('rankBadge').textContent=badge;
+  document.getElementById('rankTitle').textContent=title+'段位';
+  document.getElementById('rankDesc').textContent=desc;
+  rd.style.display='block';
+}
+
+function retryQuiz(){score=0;current=0;questions=shuffle([...allQuestions]).slice(0,20);startTime=Date.now();document.getElementById('quizCard').classList.remove('hidden');document.getElementById('resultCard').style.display='none';showQuestion()}
+function shareResult(){
+  const title=document.getElementById('rankTitle').textContent;
+  const text='我在Java面试段位测试中拿到了【'+title+'】！你也来测测？👉 https://Abyte-zym.github.io/java-rank-test';
+  if(navigator.share){navigator.share({title:'Java面试段位测试',text:text})}
+  else{navigator.clipboard.writeText(text);alert('已复制分享文案！发朋友圈吧~')}
+}
+</script>
+</body>
+</html>
